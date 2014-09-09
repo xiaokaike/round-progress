@@ -1,0 +1,23 @@
+{
+    "name": "xserver",
+    "version": "0.0.0",
+    "description": "my node server",
+    "main": "",
+    "dependencies": {},
+    "devDependencies": {
+        "express": ">=3.3.4",
+        "ejs": "~0.8.5",
+    },
+    "scripts": {
+        "test": ""
+    },
+    "repository": {
+        "type": "git",
+        "url": "https"
+    },
+    "author": "",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/xiaokaike"
+    }
+}
