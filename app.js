@@ -5,5 +5,5 @@ var fs = require('fs');
 
 app.use(express.static(__dirname + '/src/'));
 
-app.listen(3221);
-console.log('listen 3221');
+app.listen(7777);
+console.log('listen 7777');
