@@ -3,22 +3,54 @@
 
 <head>
     <title>round progress</title>
+
+    <style>
+        section {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        /*button{
+            height: 30px;
+            padding: 0 5px;
+            background-color: #fff;
+            display: inline-block;
+            border: 1px solid #eee;
+            outline: none
+        }*/
+    </style>
 </head>
 
 <body>
-    <div id="svgContainer"></div>
+    <section>
+        
+        <div id="svgContainer"></div>
 
+        
+        <button id="btnStart">Start</button>
+        <button id="btnIncrease">Increase(5)</button>
+        <button id="btnSet">Set(10)</button>
+        <button id="btnEnd">End</button>
+        
+    </section>
 
-    <button id="btnStart">Start</button>
-    <button id="btnIncrease">Increase(5)</button>
-    <button id="btnSet">Set(10)</button>
-    <button id="btnEnd">End</button>
-
-    <a target="_blank" href="http://uc.cn">ucucuc</a>
     <script type="text/javascript" src="js/roundp.js"></script>
     <!-- // <script type="text/javascript" src="js/svg-round-progress-bar.js"></script> -->
     <script>
-        roundpJs('svgContainer', {}).init();
+        var roundpJs = new RoundpJs('svgContainer', {});
+
+        document.body.addEventListener('click', function(e){
+            var curid = e.target.id;
+
+            switch (curid){
+                case 'btnIncrease':
+                    roundpJs.increase(5)
+                    break;
+                case 'btnSet':
+                    roundpJs.set(50)
+                    break;
+            }
+        })
     </script>
 </body>
 

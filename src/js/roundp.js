@@ -17,6 +17,119 @@
     //Default config/variables
     var VERSION = '0.0.1';
     var xmlns = 'http://www.w3.org/2000/svg';
+    
+    // set attr 
+    function _setAttributeNS(el, obj){
+        var o,
+            hasOwn = Object.prototype.hasOwnProperty;
+
+        for (o in obj) {
+            if (hasOwn.call(obj, o)) { // filter
+                el.setAttributeNS(null, o, obj[o]);
+            }
+        }
+    }
+    var polarToCartesian = function(centerX, centerY, radius, angleInDegrees) {
+        var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+
+        return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY + (radius * Math.sin(angleInRadians))
+        };
+    }
+
+    function _renderState(value){
+        // Calculate Size
+        var total = 100,
+            stroke = this._ops.stroke,
+            R = this._ops.radius,
+            size = R*2 + parseInt(stroke)*2 ;
+
+        // credit to http://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
+        var value       = value >= total ? total - 0.00001 : value,
+            type        = 359.9999,
+            perc        = (value/total)*type,
+            x           = size/2,
+            start       = polarToCartesian(x, x, R, perc), // in this case x and y are the same
+            end         = polarToCartesian(x, x, R, 0),
+            // arcSweep = endAngle - startAngle <= 180 ? "0" : "1",
+            arcSweep    = (perc <= 180 ? "0" : "1"),
+            d = [
+                "M", start.x, start.y, 
+                "A", R, R, 0, arcSweep, 0, end.x, end.y
+            ].join(" ");
+
+        // path set attr
+        _setAttributeNS(this.rpath, {
+            'd': d,
+        });
+    }
+
+    function _renderRound(){
+
+        // create path
+        var svgElem = this.svgElem = document.createElementNS(xmlns, 'svg'),
+            circle = document.createElementNS(xmlns, 'circle'),
+            rpath = this.rpath = document.createElementNS (xmlns, "path");
+
+        var radius = this._ops.radius,
+            stroke = this._ops.stroke;
+
+        var size = radius*2 + parseInt(stroke)*2;
+        // svgElem set attr
+        _setAttributeNS(svgElem, {
+            'width': size,
+            'height': size
+        });
+        // circle set attr
+        _setAttributeNS(circle, {
+            'cx': radius,
+            'cy': radius,
+            'stroke': this._ops.bgc,
+            'stroke-width': stroke,
+            'r': radius,
+            'fill': "none",
+            'opacity': 1.0,
+            'transform': 'translate('+ stroke +', '+ stroke +')',
+        });
+        // path set attr
+        _setAttributeNS(rpath, {
+            'stroke': this._ops.color,
+            'stroke-width': stroke,
+            'fill': "none",
+            'opacity': 1.0,
+        });
+        _renderState.call(this, 0);
+        svgElem.appendChild(circle);
+        svgElem.appendChild(rpath);
+
+        document.getElementById (this.svgContainer).appendChild(svgElem);
+
+        circle.style.transform = 'translate(15, 15)';
+
+        rpath.style.webkitTransition = 'stroke-dashoffset 0.3s ease-in-out';
+
+        var pathSize = this.pathSize = rpath.getTotalLength();
+        // rpath.style.strokeDashoffset = pathSize;
+        // rpath.style.strokeDasharray = pathSize;
+
+        setTimeout(function() {
+            // rpath.style.strokeDashoffset = 0;
+        }, 0);
+    }
+
+
+    function _getPathSize(){
+        this.pathSize = this.rpath.getTotalLength();
+    }
+
+    function _increasePercent(percent){
+        _renderState.call(this, percent);
+    }
+
+    function _setPercent(percent){
+    }
+
     /**
      * RoundpJs main class
      *
@@ -37,104 +150,39 @@
         if (typeof window._roundpjsIntervals === 'undefined')
             window._roundpjsIntervals = {};
 
-        this._options = {
+        this._ops = {
             progress: 100,
             // gradientStart: 'rgb(11,178,180)',
             // gradientStop: 'rgb(0,255,114)',
             gradientStart: null,
             gradientStop: null,
-            background: 'rgb(0,255,255)',
-            strokeWidth: 5,
-            size: 200
+            color: 'rgb(0,255,255)',
+            bgc: 'rgb(234, 234, 234)',
+            stroke: 15,
+            radius: 100
         };
+        this.init();
     }
 
-    function _createRound(){
-        // Calculate Size
-        var progress = this._options.progress > 99.9999 ? 99.9999 : this._options.progress;
-        progress = progress < 0 ? 0 : progress;
-
-        var degrees = ((progress / 100) * 360) - 90,
-            radians = (Math.PI * degrees) / 180,
-            radius = (this._options.size / 2) - this._options.strokeWidth,
-            offsetY = this._options.strokeWidth,
-            offsetX = this._options.size / 2,
-            y = Math.sin(radians) * radius + (radius + offsetY),
-            x = Math.cos(radians) * radius + offsetX,
-            arc = progress > 50 ? 1 : 0;
-
-        var path = [
-            "M " + offsetX + ", " + offsetY,
-            "A " + radius + ", " + radius, 0, arc, 1, x, y
-        ].join(",");
-
-
-        var svgElem = this.svgElem = document.createElementNS(xmlns, 'svg');
-        svgElem.setAttributeNS (null, "width", this._options.size);
-        svgElem.setAttributeNS (null, "height", this._options.size);
-        // create path
-        var rpath = this.rpath = document.createElementNS (xmlns, "path");
-        rpath.setAttributeNS (null, 'stroke', this._options.background);
-        rpath.setAttributeNS (null, 'stroke-width', this._options.strokeWidth);
-        rpath.setAttributeNS (null, 'd', path);
-        rpath.setAttributeNS (null, 'fill', "none");
-        rpath.setAttributeNS (null, 'opacity', 1.0);
-
-        svgElem.appendChild(rpath);
-
-        document.getElementById (this.svgContainer).appendChild(svgElem);
-        var pathSize = rpath.getTotalLength();
-
-        rpath.style.webkitTransition = "stroke-dashoffset 2s ease-in-out";
-        rpath.style.strokeDashoffset = pathSize;
-        rpath.style.strokeDasharray = pathSize;
-
-        setTimeout(function() {
-            rpath.style.strokeDashoffset = 0;
-        }, 0);
-    }
-
-    function _getPathSize(){
-        this.pathSize = this.rpath.getTotalLength();
-    }
-
-
-
-
-    var roundpJs = function(targetElm) {
-        if (typeof(targetElm) === 'object') {
-            //Ok, create a new instance
-            return new RoundpJs(targetElm);
-
-        } else if (typeof(targetElm) === 'string') {
-            //select the target element with query selector
-            var targetElement = document.querySelectorAll(targetElm);
-
-            if (targetElement) {
-                return new RoundpJs(targetElm, {});
-            } else {
-                throw new Error('There is no element with given selector.');
-            }
-        } else {
-            return new RoundpJs(document.body);
-        }
-    };
-    /**
-     * Current RoundpJs version
-     *
-     * @property version
-     * @type String
-     */
-    roundpJs.version = VERSION;
 
     //Prototype
-    roundpJs.fn = RoundpJs.prototype = {
-        init: function(){
+    RoundpJs.prototype = {
+        version: VERSION,
 
-            _createRound.call(this)
+        init: function(){
+            _renderRound.call(this);
+            return this;
+        },
+        increase: function(percent){
+            _increasePercent.call(this, percent);
+            return this;
+        },
+        set: function(percent){
+            _setPercent.call(this, percent);
+            return this;
         }
     };
 
-    exports.roundpJs = roundpJs;
-    return roundpJs;
+    exports.RoundpJs = RoundpJs;
+    return RoundpJs;
 }));
