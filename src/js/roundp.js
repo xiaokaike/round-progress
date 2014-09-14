@@ -29,6 +29,13 @@
             }
         }
     }
+    /**
+     * @decribe
+     * @param centerX
+     * @param centerY
+     * @param radius
+     * @params angleIndegrees   
+     */
     var polarToCartesian = function(centerX, centerY, radius, angleInDegrees) {
         var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
 
@@ -38,6 +45,10 @@
         };
     }
 
+    /**
+     * @describe
+     * @param value   
+     */
     function _renderState(value){
         // Calculate Size
         var total = 100,
@@ -53,11 +64,11 @@
             end         = polarToCartesian(x, x, R, perc), // in this case x and y are the same
             start       = polarToCartesian(x, x, R, 0),
             // arcSweep = endAngle - startAngle <= 180 ? "0" : "1",
-            arcSweep    = (perc <= 180 ? "0" : "1"),
+            arcSweep    = (perc <= 180 ? '0' : '1'),
             d = [
-                "M", start.x, start.y, 
-                "A", R, R, 0, arcSweep, 1, end.x, end.y
-            ].join(" ");
+                'M', start.x, start.y, 
+                'A', R, R, 0, arcSweep, 1, end.x, end.y
+            ].join(' ');
 
         // path set attr
         _setAttributeNS(this.rpath, {
@@ -65,6 +76,9 @@
         });
     }
 
+    /**
+     * @decribe rander    
+     */
     function _renderRound(){
 
         // create path
@@ -112,18 +126,19 @@
         var pathSize = this.pathSize = rpath.getTotalLength();
         rpath.style.strokeDashoffset = pathSize;
         rpath.style.strokeDasharray = pathSize;
-
-        setTimeout(function() {
-            rpath.style.strokeDashoffset = pathSize;
-        }, 0);
     }
 
-
+    /**
+     * @describe get path size    
+     */
     function _getPathSize(){
         this.pathSize = this.rpath.getTotalLength();
         console.log(pathSize)
     }
 
+    /**
+     * @describe increase percent    
+     */
     function _increasePercent(percent){
         var curDashoffset = this.rpath.style.strokeDashoffset;
 
@@ -137,7 +152,9 @@
 
         this.rpath.style.strokeDashoffset = dashoffset;
     }
-
+    /**
+     * @describe set percent    
+     */
     function _setPercent(percent){
         percent = 100 - percent;
         var dashoffset = (this.pathSize * percent/100);
@@ -166,8 +183,6 @@
 
         this._ops = {
             progress: 100,
-            // gradientStart: 'rgb(11,178,180)',
-            // gradientStop: 'rgb(0,255,114)',
             gradientStart: null,
             gradientStop: null,
             color: 'rgb(0,255,255)',
@@ -184,12 +199,16 @@
         version: VERSION,
 
         init: function(){
+            var me = this;
             _renderRound.call(this);
+            setTimeout(function(){
+                me.increase(20);
+            }, 0);
             return this;
         },
         start: function(){
-            
-        }
+            this.set(0)
+        },
         increase: function(percent){
             _increasePercent.call(this, percent);
             return this;
