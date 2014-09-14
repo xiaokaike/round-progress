@@ -50,13 +50,13 @@
             type        = 359.9999,
             perc        = (value/total)*type,
             x           = size/2,
-            start       = polarToCartesian(x, x, R, perc), // in this case x and y are the same
-            end         = polarToCartesian(x, x, R, 0),
+            end         = polarToCartesian(x, x, R, perc), // in this case x and y are the same
+            start       = polarToCartesian(x, x, R, 0),
             // arcSweep = endAngle - startAngle <= 180 ? "0" : "1",
             arcSweep    = (perc <= 180 ? "0" : "1"),
             d = [
                 "M", start.x, start.y, 
-                "A", R, R, 0, arcSweep, 0, end.x, end.y
+                "A", R, R, 0, arcSweep, 1, end.x, end.y
             ].join(" ");
 
         // path set attr
@@ -99,7 +99,7 @@
             'fill': "none",
             'opacity': 1.0,
         });
-        _renderState.call(this, 0);
+        _renderState.call(this, 100);
         svgElem.appendChild(circle);
         svgElem.appendChild(rpath);
 
@@ -110,24 +110,38 @@
         rpath.style.webkitTransition = 'stroke-dashoffset 0.3s ease-in-out';
 
         var pathSize = this.pathSize = rpath.getTotalLength();
-        // rpath.style.strokeDashoffset = pathSize;
-        // rpath.style.strokeDasharray = pathSize;
+        rpath.style.strokeDashoffset = pathSize;
+        rpath.style.strokeDasharray = pathSize;
 
         setTimeout(function() {
-            // rpath.style.strokeDashoffset = 0;
+            rpath.style.strokeDashoffset = pathSize;
         }, 0);
     }
 
 
     function _getPathSize(){
         this.pathSize = this.rpath.getTotalLength();
+        console.log(pathSize)
     }
 
     function _increasePercent(percent){
-        _renderState.call(this, percent);
+        var curDashoffset = this.rpath.style.strokeDashoffset;
+
+        curDashoffset = curDashoffset.replace('px', '');
+
+        if(curDashoffset == 0) return;
+
+        var dashoffset = curDashoffset - (this.pathSize * percent/100 );
+
+        dashoffset = dashoffset < 0.0001 ? 0 :  dashoffset;
+
+        this.rpath.style.strokeDashoffset = dashoffset;
     }
 
     function _setPercent(percent){
+        percent = 100 - percent;
+        var dashoffset = (this.pathSize * percent/100);
+        this.rpath.style.strokeDashoffset = dashoffset;        
     }
 
     /**
@@ -173,12 +187,19 @@
             _renderRound.call(this);
             return this;
         },
+        start: function(){
+            
+        }
         increase: function(percent){
             _increasePercent.call(this, percent);
             return this;
         },
         set: function(percent){
             _setPercent.call(this, percent);
+            return this;
+        },
+        end: function(){
+            _setPercent.call(this, 100);
             return this;
         }
     };
