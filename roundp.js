@@ -1,5 +1,5 @@
 /**
- * Progress.js v0.1.0
+ * roundp.js v0.1.0
  */
 
 (function(root, factory) {
