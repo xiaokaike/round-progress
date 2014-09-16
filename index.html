@@ -10,14 +10,6 @@
             margin: 0 auto;
             text-align: center;
         }
-        /*button{
-            height: 30px;
-            padding: 0 5px;
-            background-color: #fff;
-            display: inline-block;
-            border: 1px solid #eee;
-            outline: none
-        }*/
     </style>
 </head>
 
@@ -36,7 +28,13 @@
 
     <script type="text/javascript" src="roundp.js"></script>
     <script>
-        var roundpJs = new RoundpJs('svgContainer', {});
+        var roundpJs = new RoundpJs({
+            id : 'svgContainer',
+            color: '#00f',
+            progress: 10,
+            stroke: 10,
+            radius: 100
+        });
 
         document.body.addEventListener('click', function(e){
             var curid = e.target.id;
