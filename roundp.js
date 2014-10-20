@@ -182,11 +182,9 @@
 
     /**
      * RoundpJs main class
-     *
      * @class RoundpJs
      */
     function RoundpJs(opt) {
-
 
         this.opts = _mergeOptions({
             progress: 100,
@@ -202,7 +200,6 @@
 
         this.init();
     }
-
 
     //Prototype
     RoundpJs.prototype = {
@@ -236,3 +233,4 @@
     exports.RoundpJs = RoundpJs;
     return RoundpJs;
 }));
+
